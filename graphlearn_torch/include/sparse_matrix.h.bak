@@ -1,0 +1,72 @@
+/* Copyright 2023 Alibaba Group Holding Limited. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
+
+#ifndef GRAPHLEARN_TORCH_INCLUDE_SPARSE_MATRIX_H_
+#define GRAPHLEARN_TORCH_INCLUDE_SPARSE_MATRIX_H_
+
+#include <ATen/ATen.h>
+#include <torch/script.h>
+#include <torch/custom_class.h>
+#include "graphlearn_torch/include/common.h"
+namespace graphlearn_torch {
+
+// TODO: add CSR struct
+
+// TODO: maybe not necessary, use default pyg sparse structure
+class SparseMatrix : torch::CustomClassHolder {
+public:
+  /***
+   * TODO: what if we only support bscr
+   * TODO: what if we use compiler
+   * @param indptr, indices, values for CSR format
+   * @param values(including edge features, Dtype)
+   * @param shape
+  */
+  SparseMatrix(const torch::Tensor& indptr,
+               const torch::Tensor& indices,
+               torch::Tensor values,
+               const std::vector<int>& shape);
+
+  ~SparseMatrix();
+
+  const int64_t* indptr() const {
+    return indptr_;
+  }
+
+  const int64_t* indices() const {
+    return indices_;
+  }
+
+  // TODO: defferent Dtype and shape for values.
+
+  const std::vector<int> shape() const {
+    return shape_;
+  }
+
+  const int size(int index) const {
+    Check(index < 2, "index should be less than 2.");
+    return shape_[index];
+  }
+
+private:
+  int64_t*                indptr_;
+  int64_t*                indices_;
+  torch::Tensor           values_;
+  const std::vector<int>& shape_;
+};
+
+} // namespace graphlearn_torch
+
+#endif // GRAPHLEARN_TORCH_INCLUDE_SPARSE_MATRIX_H_
